@@ -14,95 +14,124 @@ function convertGradeToNumber(grade) {
   return gradeMap[grade] || 0.0; // 評定がマップにない場合は0.0を返す
 }
 
-// class ClassGradeを定義
-class ClassGrade {
-  constructor(courseTitle, classCode, credit, year, semester, gradeStr) {
-    this.courseTitle = courseTitle;
-    this.classCode = classCode;
-    this.credit = credit; // ここは単位数
-    this.year = year;
-    this.semester = semester;
-    this.grade = convertGradeToNumber(gradeStr); 呼び出すときは評定を数値に変換する
-  }
-}
 
-// 配属GPA計算に用いられる講義名と時間割コードのリスト
+// 配属GPA計算に用いられる講義名とその評定を保管するMap
 const compulsoryClasses = {
-  // 理工系基礎教育科目	理工必修科目
-  "RT1011": "微分積分学基礎Ⅰ",
-  "RT1022": "微分積分学基礎Ⅱ",
-  "RT1092": "線形代数基礎",
-  "RT2011": "力学基礎",
-  "RT2031": "電磁気学基礎",
-  "RT3021": "物理化学Ⅰ",
-  "RT3031": "無機化学Ⅰ",
-  "RT3041": "有機化学Ⅰ",
-  "RT9011": "理工学と現代社会",
-  // 基礎化学科目	基礎化学必修科目
-  "R13002": "基礎化学物理Ⅰ",
-  "R13006": "基礎化学物理Ⅱ",
-  "R13026": "物理化学Ⅱ",
-  "R13037": "物理化学Ⅲ",
-  "R13048": "物理化学Ⅳ",
-  "R13059": "分析化学",
-  "R13094": "無機化学Ⅱ",
-  // 無機化学Ⅲは3年次後期のため除外
-  "R13070": "無機化学Ⅳ",
-  "R13116": "有機化学Ⅱ",
-  "R13127": "有機化学Ⅲ",
-  "R13138": "有機化学Ⅳ",
-  "R13263": "有機機器分析",
-  "R13156": "化学演習Ⅰ",
-  "R13157": "化学演習Ⅱ",
-  "R13140": "英語化学文献講読Ⅰ",
-  "R13151": "英語化学文献講読Ⅱ",
-  "R13533": "化学基礎実験Ⅰ",
-  "R13544": "化学基礎実験Ⅱ",
-  "R13555": "合成・解析化学実験Ⅰ",
-  // 合成・解析化学実験Ⅱは3年次後期のため除外
+  "微分積分学基礎Ⅰ": 0.0,
+  "微分積分学基礎Ⅱ": 0.0,
+  "線形代数基礎": 0.0,
+  "力学基礎": 0.0,
+  "電磁気学基礎": 0.0,
+  "物理化学Ⅰ": 0.0,
+  "無機化学Ⅰ": 0.0,
+  "有機化学Ⅰ": 0.0,
+  "理工学と現代社会": 0.0,
+  "基礎化学物理Ⅰ": 0.0,
+  "基礎化学物理Ⅱ": 0.0,
+  "物理化学Ⅱ": 0.0,
+  "物理化学Ⅲ": 0.0,
+  "物理化学Ⅳ": 0.0,
+  "分析化学": 0.0,
+  "無機化学Ⅱ": 0.0,
+  "無機化学Ⅳ": 0.0,
+  "有機化学Ⅱ": 0.0,
+  "有機化学Ⅲ": 0.0,
+  "有機化学Ⅳ": 0.0,
+  "有機機器分析": 0.0,
+  "化学演習Ⅰ": 0.0,
+  "化学演習Ⅱ": 0.0,
+  "英語化学文献講読Ⅰ": 0.0,
+  "英語化学文献講読Ⅱ": 0.0,
+  "化学基礎実験Ⅰ": 0.0,
+  "化学基礎実験Ⅱ": 0.0,
+  "合成・解析化学実験Ⅰ": 0.0
 };
+
 const electiveClasses = {
-  // 基礎化学科目 基礎化学選択科目
-  "R13162": "化学結合論",
-  "R13180": "熱力学・統計熱力学",
-  "R13083": "機器分析",
-  "R13198": "固体化学",
-  "R13184": "量子化学",
-  "R13285": "物性化学",
-  "R13343": "反応物理化学",
-  "R13353": "地球化学",
-  "R13354": "放射化学",
-  "R13307": "天然物化学",
-  "R13318": "有機反応化学Ⅰ",
-  "R13320": "有機反応化学Ⅱ",
-  // 現代の化学は配属GPA計算から除外されている
+  "化学結合論": 0.0,
+  "熱力学・統計熱力学": 0.0,
+  "機器分析": 0.0,
+  "固体化学": 0.0,
+  "量子化学": 0.0,
+  "物性化学": 0.0,
+  "反応物理化学": 0.0,
+  "地球化学": 0.0,
+  "放射化学": 0.0,
+  "天然物化学": 0.0,
+  "有機反応化学Ⅰ": 0.0,
+  "有機反応化学Ⅱ": 0.0
 };
+
 const electiveCompulsoryClasses = {
-  // 理工系基礎教育科目 理工選択必修科目 （この中から1科目）
-  "RT4012": "生物学基礎",
-  "RT4021": "基礎生化学",
-  "RT4031": "基礎分子生物学",
-  "RT4041": "基礎細胞生物学",
-  "RT4051": "基礎生体適応学",
-  "RT4061": "基礎生体機能学",
-  "RT4071": "基礎生体情報制御学",
+  "生物学基礎": 0.0,
+  "基礎生化学": 0.0,
+  "基礎分子生物学": 0.0,
+  "基礎細胞生物学": 0.0,
+  "基礎生体適応学": 0.0,
+  "基礎生体機能学": 0.0,
+  "基礎生体情報制御学": 0.0
+};
+
+// 各科目の単位数を保管するMap
+const creditMap = {
+  "微分積分学基礎Ⅰ": 2,
+  "微分積分学基礎Ⅱ": 2,
+  "線形代数基礎": 2,
+  "力学基礎": 2,
+  "電磁気学基礎": 2,
+  "物理化学Ⅰ": 2,
+  "無機化学Ⅰ": 2,
+  "有機化学Ⅰ": 2,
+  "理工学と現代社会": 2,
+  "基礎化学物理Ⅰ": 2,
+  "基礎化学物理Ⅱ": 2,
+  "物理化学Ⅱ": 2,
+  "物理化学Ⅲ": 2,
+  "物理化学Ⅳ": 2,
+  "分析化学": 2,
+  "無機化学Ⅱ": 2,
+  "無機化学Ⅳ": 2,
+  "有機化学Ⅱ": 2,
+  "有機化学Ⅲ": 2,
+  "有機化学Ⅳ": 2,
+  "有機機器分析": 2,
+  "化学演習Ⅰ": 2,
+  "化学演習Ⅱ": 2,
+  "英語化学文献講読Ⅰ": 2,
+  "英語化学文献講読Ⅱ": 2,
+  "化学基礎実験Ⅰ": 2,
+  "化学基礎実験Ⅱ": 2,
+  "合成・解析化学実験Ⅰ": 4,
+  "化学結合論": 2,
+  "熱力学・統計熱力学": 2,
+  "機器分析": 2,
+  "固体化学": 2,
+  "量子化学": 2,
+  "物性化学": 2,
+  "反応物理化学": 2,
+  "地球化学": 2,
+  "放射化学": 2,
+  "天然物化学": 2,
+  "有機反応化学Ⅰ": 2,
+  "有機反応化学Ⅱ": 2,
+  "生物学基礎": 2,
+  "基礎生化学": 2,
+  "基礎分子生物学": 2,
+  "基礎細胞生物学": 2,
+  "基礎生体適応学": 2,
+  "基礎生体機能学": 2,
+  "基礎生体情報制御学": 2
 };
 
 
 // webブラウザ上でCSVデータを読み込み、ClassGradeオブジェクトの配列を返す関数
-////////////////////////////////////////////////////
-// CoPilotに作らせたので手直しが必要かもしれない！   //
-////////////////////////////////////////////////////
 function parseCSVData(csvData) {
   const lines = csvData.split('\n');
-  const classGrades = []; // 配属GPAに算入するClassGradeオブジェクトを格納する配列
-  const electiveClassesGrades = []; // 履修したすべての選択科目を一時保存しておく配列
-  const electiveCompulsoryClassGlades = []; // 履修したすべての選択必修科目を一時保存しておく配列
 
   // 基礎化学科の学生かどうかを判定する
   if (!lines[1].includes("理学部基礎化学科")) { // 2行目に学部・学科情報が含まれていると決めつけているから将来的に動作しない可能性がある
     alert("このCSVデータは理学部基礎化学科の学生のものではありません。");
-    return classGrades; // 空の配列を返す
+    return []; // 空の配列を返す
   }
 
   for (let i = 5; i < lines.length; i++) { // 最初から4行とヘッダーはスキップ（nullとして出力されるだけなら別にぶん回してもいいんじゃないか？）
@@ -110,66 +139,107 @@ function parseCSVData(csvData) {
     if (line === '') continue; // 空行をスキップ
 
     // CSVの各行をカンマで分割して必要なフィールドを抽出
-    const [mainClassification, del1, tertiaryClassification, del3, courseTitle, classCode, del4, credit, year, semester, gradeStr] = line.split(',');
+    let splitLine = line.split(',');
+    let mainClassification = splitLine[0];
+    let tertiaryClassification = splitLine[2];
+    let courseTitle = splitLine[4];
+    let grade = convertGradeToNumber(splitLine[10]);
 
     // 計算に必要な科目
     if (mainClassification === "理学部専門科目") {
       // 理学部専門科目以外はスキップ
       if (tertiaryClassification === "理工必修科目" || tertiaryClassification === "基礎化学必修科目") {
-        // 算入されない科目があるからcompulsoryClassesから比較して，classGradesに追加
-        if (classCode in compulsoryClasses) {
-          let newClass = new ClassGrade(courseTitle, classCode, parseFloat(credit), parseInt(year), parseInt(semester[0]), gradeStr);
-          classGrades.push(newClass); 
-        } else {
-          continue; // 配属GPAの計算に入らない必修科目はスキップ
+        // 必修科目の評定をcompulsoryClassesに保存する
+        if (courseTitle in compulsoryClasses) {
+          // 今保存されているものより高い評定なら更新する
+          if (compulsoryClasses[courseTitle] < grade) {
+            compulsoryClasses[courseTitle] = grade;
+          }
         }
       } else if (tertiaryClassification === "基礎化学選択科目") {
-        // 算入されない科目があるからelectiveClassesから比較して，classGradesに追加
-        if (classCode in electiveClasses) {
-          let newClass = new ClassGrade(courseTitle, classCode, parseFloat(credit), parseInt(year), parseInt(semester[0]), gradeStr);
-          electiveclassGrades.push(newClass);
-        } else {
-          continue; // 配属GPAの計算に入らない選択科目はスキップ
+        // 選択科目の評定をelectiveClassesに保存する
+        if (courseTitle in electiveClasses) {
+          // 今保存されているものより高い評定なら更新する
+          if (electiveClasses[courseTitle] < grade) {
+            electiveClasses[courseTitle] = grade;
+          }
         }
       } else if (tertiaryClassification === "理工選択必修科目") {
-        // 算入されない科目があるからelectiveCompulsoryClassesから比較して，electiveCompulsoryclassGradesに追加
-        if (classCode in electiveCompulsoryClasses) {
-          let newClass = new ClassGrade(courseTitle, classCode, parseFloat(credit), parseInt(year), parseInt(semester[0]), gradeStr);
-          electiveCompulsoryclassGrades.push(newClass);
-        } else {
-          continue; // 配属GPAの計算に入らない選択必修科目はスキップ
+        // 選択必修科目の評定をelectiveCompulsoryClassesに保存する
+        if (courseTitle in electiveCompulsoryClasses) {
+          // 今保存されているものより高い評定なら更新する
+          if (electiveCompulsoryClasses[courseTitle] < grade) {
+            electiveCompulsoryClasses[courseTitle] = grade;
+          }
         }
       }
     } else {
       continue; // その他の配属GPAの計算に不要な科目はスキップ
     }
   }
-  ClassGrade.push(electiveCompulsoryClassGlades);
-  return classGrades;
 }
 
-// electiveClassesから科目数を勘定して4科目までclassGradesに追加し足りなかったらそれを記録しておく関数
+// electiveClassesのうち評定が0より大きい科目が4科目以上であるなら，その超えた分の科目数を返す関数
+function countExtraElectiveClasses() {
+  let count = 0;
+  for (let grade of Object.values(electiveClasses)) {
+    if (grade > 0) {
+      count++;
+    }
+  }
+  return Math.max(0, count - 4); // 4科目を超えた分の科目数を返す
+}
 
+// electiveClassesから科目数を勘定して上位4科目をcompulsoryClassesに追加する関数
+function addTopElectiveClasses() {
+  // electiveClassesを評定の高い順にソートして上位4科目を選ぶ
+  let sortedElectiveClasses = Object.entries(electiveClasses)
+    .filter(([_, grade]) => grade > 0) // 評定が0より大きいものだけを対象にする
+    .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
+    .slice(0, 4); // 上位4科目を取得
 
-// electiveCompulsoryClassesから1科目選んでclassGradesに追加する関数
+  // 選ばれた科目をcompulsoryClassesに追加する
+  // 4科目に満たない場合は0埋めされるので、そのまま追加しても問題ない
+  for (let [courseTitle, grade] of sortedElectiveClasses) {
+    compulsoryClasses[courseTitle] = grade;
+  }
+}
+
+// electiveCompulsoryClassesから上位1科目をcompulsoryClassesに追加する関数
+function addTopElectiveCompulsoryClass() {
+  // electiveCompulsoryClassesを評定の高い順にソートして上位1科目を選ぶ
+  let sortedElectiveCompulsoryClasses = Object.entries(electiveCompulsoryClasses)
+    .filter(([_, grade]) => grade > 0) // 評定が0より大きいものだけを対象にする
+    .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
+    .slice(0, 1); // 上位1科目を取得
+
+  // 選ばれた科目をcompulsoryClassesに追加する
+  for (let [courseTitle, grade] of sortedElectiveCompulsoryClasses) {
+    compulsoryClasses[courseTitle] = grade;
+  }
+}
 
 
 // 配属GPAを計算する関数
-function calculateGPA(classGrades) {
+  // GPA = (必修科目の評定と単位数の積の総和 + 選択科目上位4科目の評定と単位数の積の総和(4科目に満たないときは0埋めする) + 選択必修科目上位1科目の評定と単位数の積 + 選択科目のうち4科目を超えた分の科目数) / (必修科目・選択科目・選択必修科目の単位数の総和)
+function calculateGPA() {
+  // electiveClassesから上位4科目をcompulsoryClassesに追加する
+  addTopElectiveClasses();
+
+  // electiveCompulsoryClassesから上位1科目をcompulsoryClassesに追加する
+  addTopElectiveCompulsoryClass();
+
+  // 各科目の評定の総和を計算する
+  let totalGrade = 0.0;
   let totalCredits = 0;
-  let totalPoints = 0;
-
-  // 各科目の単位数と評定を用いて単位数と評定の積を計算
-  classGrades.forEach(cls => {
-    totalCredits += cls.credit;
-    totalPoints += cls.credit * cls.grade;
-  });
-
-  // ここで選択科目の不足分や過剰分を補う処理を行う．
-
-  // GPAを計算するが，TotalCreditsが0の場合はGPAも0とする
-  if (totalCredits === 0) return "0.00";
-  // 一方でTotalCreditsは固定して計算すべきかもしれない（単位数は固定されている）
-  const gpa = totalPoints / totalCredits;
-  return gpa.toFixed(2); // 小数点以下2桁に丸める
+  for (let [courseTitle, grade] of Object.entries(compulsoryClasses)) {
+    let credits = creditMap[courseTitle] || 0; // creditMapに科目がない場合は0単位とする（ありえないはずだが）
+    totalGrade += grade * credits;
+    totalCredits += credits;
+  }
+  // electiveClassesのうち4科目を超えた分の科目数を加算する
+  totalGrade += countExtraElectiveClasses();
+  // GPAを計算する
+  let gpa = totalCredits > 0 ? totalGrade / totalCredits : 0.0;
+  return gpa.toFixed(2); // 小数点以下2桁に丸めて返す
 }

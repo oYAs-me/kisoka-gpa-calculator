@@ -1,3 +1,5 @@
+// import createTable from "./table.js";
+
 // 評定を数値に変換する関数
 function convertGradeToNumber(grade) {
   const gradeMap = {
@@ -262,6 +264,28 @@ function convertShiftJISToUTF8(shiftJISArrayBuffer) {
   return utf8String;
 }
 
+// 履修科目の表を作成する関数
+function createTable(compulsoryClasses) {
+  const table = document.getElementById("tableBody");
+  table.innerHTML = ""; // 既存の内容をクリア
+
+  for (const [courseTitle, grade] of Object.entries(compulsoryClasses)) {
+    const row = document.createElement("tr");
+    const titleCell = document.createElement("td");
+    const creditCell = document.createElement("td");
+    const gradeCell = document.createElement("td");
+
+    titleCell.textContent = courseTitle;
+    creditCell.textContent = creditMap[courseTitle] || "N/A";
+    gradeCell.textContent = grade.toString();
+  
+    row.appendChild(titleCell);
+    row.appendChild(creditCell);
+    row.appendChild(gradeCell);
+    table.appendChild(row);
+  }
+}
+
 // Calculate GPAボタンがクリックされたときの処理
 document.getElementById('calcButton').addEventListener('click', () => {
   const fileInput = document.getElementById('fileInput');
@@ -280,6 +304,7 @@ document.getElementById('calcButton').addEventListener('click', () => {
     const gpa = calculateGPA();
     document.getElementById('result').innerText = `配属GPA: ${gpa}`;
     console.log(compulsoryClasses);
+    createTable(compulsoryClasses); // テーブルを作成
   };
   reader.readAsArrayBuffer(file);
 });

@@ -126,31 +126,37 @@ const creditMap = {
 
 // webブラウザ上でCSVデータを読み込み、ClassGradeオブジェクトの配列を返す関数
 function parseCSVData(csvData) {
-  const lines = csvData.split('\n');
+  // CSVデータを行ごとに分割
+    // shift-jisでエンコードされているので、UTF-8に変換する必要がある（エラーが出ているがやり方がわからない）
+	const lines = csvData.split('\n');
 
   // 基礎化学科の学生かどうかを判定する
-  if (!lines[1].includes("理学部基礎化学科")) { // 2行目に学部・学科情報が含まれていると決めつけているから将来的に動作しない可能性がある
+    // 2行目に"理学部基礎化学科"が含まれているかどうかで判定する
+  if (!lines[1].includes("理学部基礎化学科")) {
     alert("このCSVデータは理学部基礎化学科の学生のものではありません。");
     return []; // 空の配列を返す
   }
 
   for (let i = 5; i < lines.length; i++) { // 最初から4行とヘッダーはスキップ（nullとして出力されるだけなら別にぶん回してもいいんじゃないか？）
-    const line = lines[i].trim();
+    let line = lines[i].trim();
     if (line === '') continue; // 空行をスキップ
-
+    line = line.replaceAll("\"", ''); // 「"」を削除
+    // console.log(line); // デバッグ用
     // CSVの各行をカンマで分割して必要なフィールドを抽出
     let splitLine = line.split(',');
-    let mainClassification = splitLine[0];
-    let tertiaryClassification = splitLine[2];
-    let courseTitle = splitLine[4];
-    let grade = convertGradeToNumber(splitLine[10]);
+    let mainClassification = splitLine[1];
+    let tertiaryClassification = splitLine[3];
 
     // 計算に必要な科目
     if (mainClassification === "理学部専門科目") {
       // 理学部専門科目以外はスキップ
+      // 科目名と評定は必要になってから取得する
+      let courseTitle = splitLine[4];
+      let gradeStr = splitLine[10];
       if (tertiaryClassification === "理工必修科目" || tertiaryClassification === "基礎化学必修科目") {
         // 必修科目の評定をcompulsoryClassesに保存する
         if (courseTitle in compulsoryClasses) {
+          let grade = convertGradeToNumber(gradeStr);
           // 今保存されているものより高い評定なら更新する
           if (compulsoryClasses[courseTitle] < grade) {
             compulsoryClasses[courseTitle] = grade;
@@ -159,6 +165,7 @@ function parseCSVData(csvData) {
       } else if (tertiaryClassification === "基礎化学選択科目") {
         // 選択科目の評定をelectiveClassesに保存する
         if (courseTitle in electiveClasses) {
+          let grade = convertGradeToNumber(gradeStr);
           // 今保存されているものより高い評定なら更新する
           if (electiveClasses[courseTitle] < grade) {
             electiveClasses[courseTitle] = grade;
@@ -167,6 +174,7 @@ function parseCSVData(csvData) {
       } else if (tertiaryClassification === "理工選択必修科目") {
         // 選択必修科目の評定をelectiveCompulsoryClassesに保存する
         if (courseTitle in electiveCompulsoryClasses) {
+          let grade = convertGradeToNumber(gradeStr);
           // 今保存されているものより高い評定なら更新する
           if (electiveCompulsoryClasses[courseTitle] < grade) {
             electiveCompulsoryClasses[courseTitle] = grade;
@@ -194,7 +202,6 @@ function countExtraElectiveClasses() {
 function addTopElectiveClasses() {
   // electiveClassesを評定の高い順にソートして上位4科目を選ぶ
   let sortedElectiveClasses = Object.entries(electiveClasses)
-    .filter(([_, grade]) => grade > 0) // 評定が0より大きいものだけを対象にする
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 4); // 上位4科目を取得
 
@@ -202,6 +209,7 @@ function addTopElectiveClasses() {
   // 4科目に満たない場合は0埋めされるので、そのまま追加しても問題ない
   for (let [courseTitle, grade] of sortedElectiveClasses) {
     compulsoryClasses[courseTitle] = grade;
+    console.log(`Added elective class: ${courseTitle} with grade ${grade}`); // デバッグ用
   }
 }
 
@@ -209,13 +217,13 @@ function addTopElectiveClasses() {
 function addTopElectiveCompulsoryClass() {
   // electiveCompulsoryClassesを評定の高い順にソートして上位1科目を選ぶ
   let sortedElectiveCompulsoryClasses = Object.entries(electiveCompulsoryClasses)
-    .filter(([_, grade]) => grade > 0) // 評定が0より大きいものだけを対象にする
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 1); // 上位1科目を取得
 
   // 選ばれた科目をcompulsoryClassesに追加する
   for (let [courseTitle, grade] of sortedElectiveCompulsoryClasses) {
     compulsoryClasses[courseTitle] = grade;
+    console.log(`Added elective compulsory class: ${courseTitle} with grade ${grade}`); // デバッグ用
   }
 }
 
@@ -241,5 +249,37 @@ function calculateGPA() {
   totalGrade += countExtraElectiveClasses();
   // GPAを計算する
   let gpa = totalCredits > 0 ? totalGrade / totalCredits : 0.0;
-  return gpa.toFixed(2); // 小数点以下2桁に丸めて返す
+  console.log(totalCredits, totalGrade);
+  return gpa.toFixed(3); // 小数点以下2桁に丸めて
 }
+
+// Shift-JISをUTF-8に変換する関数
+function convertShiftJISToUTF8(shiftJISArrayBuffer) {
+  const uint8Array = new Uint8Array(shiftJISArrayBuffer);
+  // console.log(uint8Array);
+  const utf8Array = Encoding.convert(uint8Array, { to: 'UNICODE', from: 'SJIS' });
+  const utf8String = Encoding.codeToString(utf8Array);
+  return utf8String;
+}
+
+// Calculate GPAボタンがクリックされたときの処理
+document.getElementById('calcButton').addEventListener('click', () => {
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("CSVファイルを選択してください。");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let csvData = e.target.result;
+    csvData = convertShiftJISToUTF8(csvData); // Shift-JISをUTF-8に変換
+    // console.log(csvData); // CSVデータをコンソールに出力（デバッグ用）
+    parseCSVData(csvData);
+    const gpa = calculateGPA();
+    document.getElementById('result').innerText = `配属GPA: ${gpa}`;
+    console.log(compulsoryClasses);
+  };
+  reader.readAsArrayBuffer(file);
+});

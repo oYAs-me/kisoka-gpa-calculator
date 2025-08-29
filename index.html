@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+<meta charset="UTF-8">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,5 +9,11 @@
 <body>
   <h1>基礎化学科　配属GPA Calculator</h1>
   <p>CampusSquareの成績一覧CSVファイルを使って配属GPAを計算します</p>
+  <input type="file" id="fileInput" accept=".csv">
+  <button id="calcButton">計算</button>
+  <div id="result"></div>
 </body>
+<!-- JavaScriptファイルの読み込み -->
+<script src="calc.js"></script>
+<script src="https://unpkg.com/encoding-japanese@2.2.0/encoding.min.js"></script>
 </html>

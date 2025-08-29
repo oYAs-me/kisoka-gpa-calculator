@@ -148,40 +148,25 @@ function parseCSVData(csvData) {
     let splitLine = line.split(',');
     let mainClassification = splitLine[1];
     let tertiaryClassification = splitLine[3];
+    let courseTitle = splitLine[4];
+    let grade = convertGradeToNumber(splitLine[splitLine.length -3]); // カンマが最後に含まれているから，最後から2番目の要素でも3を指定しないといけない
+    console.log(mainClassification, tertiaryClassification, courseTitle, grade); // デバッグ用
 
     // 計算に必要な科目
-    if (mainClassification === "理学部専門科目") {
-      // 理学部専門科目以外はスキップ
-      // 科目名と評定は必要になってから取得する
-      let courseTitle = splitLine[4];
-      let gradeStr = splitLine[10];
-      if (tertiaryClassification === "理工必修科目" || tertiaryClassification === "基礎化学必修科目") {
-        // 必修科目の評定をcompulsoryClassesに保存する
-        if (courseTitle in compulsoryClasses) {
-          let grade = convertGradeToNumber(gradeStr);
-          // 今保存されているものより高い評定なら更新する
-          if (compulsoryClasses[courseTitle] < grade) {
-            compulsoryClasses[courseTitle] = grade;
-          }
-        }
-      } else if (tertiaryClassification === "基礎化学選択科目") {
-        // 選択科目の評定をelectiveClassesに保存する
-        if (courseTitle in electiveClasses) {
-          let grade = convertGradeToNumber(gradeStr);
-          // 今保存されているものより高い評定なら更新する
-          if (electiveClasses[courseTitle] < grade) {
-            electiveClasses[courseTitle] = grade;
-          }
-        }
-      } else if (tertiaryClassification === "理工選択必修科目") {
-        // 選択必修科目の評定をelectiveCompulsoryClassesに保存する
-        if (courseTitle in electiveCompulsoryClasses) {
-          let grade = convertGradeToNumber(gradeStr);
-          // 今保存されているものより高い評定なら更新する
-          if (electiveCompulsoryClasses[courseTitle] < grade) {
-            electiveCompulsoryClasses[courseTitle] = grade;
-          }
-        }
+    if (courseTitle in compulsoryClasses) {
+      // 今保存されているものより高い評定なら更新する
+      if (compulsoryClasses[courseTitle] < grade) {
+        compulsoryClasses[courseTitle] = grade;
+      } 
+    } else if (courseTitle in electiveClasses) {
+      // 今保存されているものより高い評定なら更新する
+      if (electiveClasses[courseTitle] < grade) {
+        electiveClasses[courseTitle] = grade;
+      } 
+    } else if (courseTitle in electiveCompulsoryClasses) {
+      // 今保存されているものより高い評定なら更新する
+      if (electiveCompulsoryClasses[courseTitle] < grade) {
+        electiveCompulsoryClasses[courseTitle] = grade;
       }
     } else {
       continue; // その他の配属GPAの計算に不要な科目はスキップ

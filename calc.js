@@ -16,7 +16,6 @@ function convertGradeToNumber(grade) {
   return gradeMap[grade] || 0.0; // 評定がマップにない場合は0.0を返す
 }
 
-
 // 配属GPA計算に用いられる講義名とその評定を保管するMap
 const compulsoryClasses = {
   "微分積分学基礎Ⅰ": 0.0,
@@ -73,6 +72,9 @@ const electiveCompulsoryClasses = {
   "基礎生体機能学": 0.0,
   "基礎生体情報制御学": 0.0
 };
+
+// GPA計算に用いるすべての講義名とその評定を保管するMap
+let calcClasses = {}
 
 // 各科目の単位数を保管するMap
 const creditMap = {
@@ -150,7 +152,7 @@ function parseCSVData(csvData) {
     let tertiaryClassification = splitLine[3];
     let courseTitle = splitLine[4];
     let grade = convertGradeToNumber(splitLine[splitLine.length -3]); // カンマが最後に含まれているから，最後から2番目の要素でも3を指定しないといけない
-    console.log(mainClassification, tertiaryClassification, courseTitle, grade); // デバッグ用
+    // console.log(mainClassification, tertiaryClassification, courseTitle, grade); // デバッグ用
 
     // 計算に必要な科目
     if (courseTitle in compulsoryClasses) {
@@ -187,6 +189,7 @@ function countExtraElectiveClasses() {
 
 // electiveClassesから科目数を勘定して上位4科目をcompulsoryClassesに追加する関数
 function addTopElectiveClasses() {
+  // console.log(electiveClasses); // デバッグ用
   // electiveClassesを評定の高い順にソートして上位4科目を選ぶ
   let sortedElectiveClasses = Object.entries(electiveClasses)
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
@@ -195,13 +198,14 @@ function addTopElectiveClasses() {
   // 選ばれた科目をcompulsoryClassesに追加する
   // 4科目に満たない場合は0埋めされるので、そのまま追加しても問題ない
   for (let [courseTitle, grade] of sortedElectiveClasses) {
-    compulsoryClasses[courseTitle] = grade;
-    console.log(`Added elective class: ${courseTitle} with grade ${grade}`); // デバッグ用
+    calcClasses[courseTitle] = grade;
+    // console.log(`Added elective class: ${courseTitle} with grade ${grade}`); // デバッグ用
   }
 }
 
 // electiveCompulsoryClassesから上位1科目をcompulsoryClassesに追加する関数
 function addTopElectiveCompulsoryClass() {
+  // console.log(electiveCompulsoryClasses); // デバッグ用
   // electiveCompulsoryClassesを評定の高い順にソートして上位1科目を選ぶ
   let sortedElectiveCompulsoryClasses = Object.entries(electiveCompulsoryClasses)
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
@@ -209,8 +213,8 @@ function addTopElectiveCompulsoryClass() {
 
   // 選ばれた科目をcompulsoryClassesに追加する
   for (let [courseTitle, grade] of sortedElectiveCompulsoryClasses) {
-    compulsoryClasses[courseTitle] = grade;
-    console.log(`Added elective compulsory class: ${courseTitle} with grade ${grade}`); // デバッグ用
+    calcClasses[courseTitle] = grade;
+    // console.log(`Added elective compulsory class: ${courseTitle} with grade ${grade}`); // デバッグ用
   }
 }
 
@@ -218,16 +222,21 @@ function addTopElectiveCompulsoryClass() {
 // 配属GPAを計算する関数
   // GPA = (必修科目の評定と単位数の積の総和 + 選択科目上位4科目の評定と単位数の積の総和(4科目に満たないときは0埋めする) + 選択必修科目上位1科目の評定と単位数の積 + 選択科目のうち4科目を超えた分の科目数) / (必修科目・選択科目・選択必修科目の単位数の総和)
 function calculateGPA() {
-  // electiveClassesから上位4科目をcompulsoryClassesに追加する
+  // compulsoryClassesのすべての科目をcalcClassesに追加する
+  for (let key in compulsoryClasses) {
+    calcClasses[key] = compulsoryClasses[key];
+  }
+
+  // electiveClassesから上位4科目をcalcClassesに追加する
   addTopElectiveClasses();
 
-  // electiveCompulsoryClassesから上位1科目をcompulsoryClassesに追加する
+  // electiveCompulsoryClassesから上位1科目をcalcClassesに追加する
   addTopElectiveCompulsoryClass();
 
-  // 各科目の評定の総和を計算する
+  // calcClassesから各科目の評定の総和を計算する
   let totalGrade = 0.0;
   let totalCredits = 0;
-  for (let [courseTitle, grade] of Object.entries(compulsoryClasses)) {
+  for (let [courseTitle, grade] of Object.entries(calcClasses)) {
     let credits = creditMap[courseTitle] || 0; // creditMapに科目がない場合は0単位とする（ありえないはずだが）
     totalGrade += grade * credits;
     totalCredits += credits;
@@ -236,7 +245,7 @@ function calculateGPA() {
   totalGrade += countExtraElectiveClasses();
   // GPAを計算する
   let gpa = totalCredits > 0 ? totalGrade / totalCredits : 0.0;
-  console.log(totalCredits, totalGrade);
+  console.log(totalGrade, "/", totalCredits, "=", gpa); // デバッグ用
   return gpa.toFixed(3); // 小数点以下2桁に丸めて
 }
 
@@ -250,11 +259,11 @@ function convertShiftJISToUTF8(shiftJISArrayBuffer) {
 }
 
 // 履修科目の表を作成する関数
-function createTable(compulsoryClasses) {
+function createTable(calcClasses) {
   const table = document.getElementById("tableBody");
   table.innerHTML = ""; // 既存の内容をクリア
 
-  for (const [courseTitle, grade] of Object.entries(compulsoryClasses)) {
+  for (const [courseTitle, grade] of Object.entries(calcClasses)) {
     const row = document.createElement("tr");
     const titleCell = document.createElement("td");
     const creditCell = document.createElement("td");
@@ -271,8 +280,24 @@ function createTable(compulsoryClasses) {
   }
 }
 
+// グローバル変数を初期化する
+function initializeGlobals() {
+  for (let key in compulsoryClasses) {
+    compulsoryClasses[key] = 0.0;
+  }
+  for (let key in electiveClasses) {
+    electiveClasses[key] = 0.0;
+  }
+  for (let key in electiveCompulsoryClasses) {
+    electiveCompulsoryClasses[key] = 0.0;
+  }
+  calcClasses = {};
+}
+
 // Calculate GPAボタンがクリックされたときの処理
 document.getElementById('calcButton').addEventListener('click', () => {
+  initializeGlobals(); // グローバル変数を初期化
+
   const fileInput = document.getElementById('fileInput');
   const file = fileInput.files[0];
   if (!file) {
@@ -288,8 +313,8 @@ document.getElementById('calcButton').addEventListener('click', () => {
     parseCSVData(csvData);
     const gpa = calculateGPA();
     document.getElementById('result').innerText = `配属GPA: ${gpa}`;
-    console.log(compulsoryClasses);
-    createTable(compulsoryClasses); // テーブルを作成
+    // console.log(calcClasses); // デバッグ用
+    createTable(calcClasses); // テーブルを作成
   };
   reader.readAsArrayBuffer(file);
 });

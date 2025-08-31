@@ -13,6 +13,18 @@ body {
   padding: 20px;
 }
 
+/* 960px以上のウィンドウでコンテンツをセンタリング */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+@media (min-width: 961px) {
+  body {
+    padding: 40px 20px;
+  }
+}
+
 /* ヘッダーセクション */
 #head {
   background: rgba(255, 255, 255, 0.95);
@@ -175,13 +187,9 @@ body {
 #gradeTable td {
   padding: 12px;
   text-align: center;
+  border: none; /* ブラウザ標準のボーダーを削除 */
   border-bottom: 1px solid #ecf0f1;
   transition: background-color 0.2s ease;
-}
-
-/* 最後の行の下線を確実に表示 */
-#gradeTable tbody tr:last-child td {
-  border-bottom: 1px solid #ecf0f1;
 }
 
 #gradeTable tbody tr:hover {
@@ -202,22 +210,24 @@ body {
 }
 
 /* フッター */
-body > small {
+.container > small {
   display: block;
   text-align: center;
   color: rgba(255, 255, 255, 0.8);
   margin-top: 30px;
   font-size: 0.9em;
+  width: 100%;
+  overflow: hidden;
 }
 
-body > small a {
+.container > small a {
   color: #3498db;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
-body > small a:hover {
+.container > small a:hover {
   color: #2980b9;
   text-decoration: underline;
 }
@@ -293,3 +303,5 @@ body > small a:hover {
 #gradeTable tbody tr {
   animation: slideIn 0.3s ease-out;
 }
+
+/* Claude Sonnet 4 に手伝ってもらった */

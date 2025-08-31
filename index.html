@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="container">
   <div id="head">
     <h1>基礎化学科　配属GPA Calculator</h1>
     <p>CampusSquareの成績一覧CSVファイルを使って配属GPAを計算します</p>
@@ -15,8 +16,8 @@
   <div id="instructions">
     <h2>使い方</h2>
     <ol>
-      <li>CampusSquareの成績からファイル出力で、CSVファイルをダウンロードする</li>
-      <li>下の「ファイル選択」ボタンで、CSVファイルを選択する</li>
+      <li>CampusSquareの成績から「ファイルに出力」で、CSVファイルをダウンロードする</li>
+      <li>青点線内の「参照」から、CSVファイルを選択する</li>
       <li>「計算」ボタンを押す</li>
     </ol>
   </div>
@@ -35,11 +36,12 @@
       <tbody id="tableBody">
         <!-- 動的に行が追加されます -->
       </tbody>
-      <small>基礎化学科選択科目の履修数が4科目でない場合、履修した科目が表示されないか履修していない科目が表示されることがあります。</small>
+      <small>基礎化学科選択科目の履修数が4科目でない場合、履修した科目が表示されないか、履修していない科目が表示されることがあります。</small>
     </table>
   </div>
 
-  <small>このツールのソースコードは<a href="https://github.com/oYAs-me/kisoka-gpa-calculator" target="_blank" rel="noopener">GitHub</a>上で公開しています</small>
+  <small>このツールのソースコードは<a href="https://github.com/oYAs-me/kisoka-gpa-calculator" target="_blank" rel="noopener">GitHub</a>上で公開しています。<br>間違いや修正すべき場所がありましたら、GitHubのissueでの報告をお願いします。</small>
+  </div> <!-- containerおわり -->
 </body>
 <!-- JavaScriptファイルの読み込み -->
 <script src="calc.js"></script>

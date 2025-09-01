@@ -74,7 +74,7 @@ const electiveCompulsoryClasses = {
 };
 
 // GPA計算に用いるすべての講義名とその評定を保管するMap
-let calcClasses = {}
+const calcClasses = new Map();
 
 // 各科目の単位数を保管するMap
 const creditMap = {
@@ -291,7 +291,7 @@ function initializeGlobals() {
   for (const key in electiveCompulsoryClasses) {
     electiveCompulsoryClasses[key] = 0.0;
   }
-  calcClasses = {};
+  calcClasses.clear;
 }
 
 // Calculate GPAボタンがクリックされたときの処理

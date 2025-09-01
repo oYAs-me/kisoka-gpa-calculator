@@ -197,7 +197,7 @@ function addTopElectiveClasses() {
 
   // 選ばれた科目をcompulsoryClassesに追加する
   // 4科目に満たない場合は0埋めされるので、そのまま追加しても問題ない
-  for (let [courseTitle, grade] of sortedElectiveClasses) {
+  for (const [courseTitle, grade] of sortedElectiveClasses) {
     calcClasses[courseTitle] = grade;
     // console.log(`Added elective class: ${courseTitle} with grade ${grade}`); // デバッグ用
   }
@@ -212,7 +212,7 @@ function addTopElectiveCompulsoryClass() {
     .slice(0, 1); // 上位1科目を取得
 
   // 選ばれた科目をcompulsoryClassesに追加する
-  for (let [courseTitle, grade] of sortedElectiveCompulsoryClasses) {
+  for (const [courseTitle, grade] of sortedElectiveCompulsoryClasses) {
     calcClasses[courseTitle] = grade;
     // console.log(`Added elective compulsory class: ${courseTitle} with grade ${grade}`); // デバッグ用
   }
@@ -223,7 +223,7 @@ function addTopElectiveCompulsoryClass() {
   // GPA = (必修科目の評定と単位数の積の総和 + 選択科目上位4科目の評定と単位数の積の総和(4科目に満たないときは0埋めする) + 選択必修科目上位1科目の評定と単位数の積 + 選択科目のうち4科目を超えた分の科目数) / (必修科目・選択科目・選択必修科目の単位数の総和)
 function calculateGPA() {
   // compulsoryClassesのすべての科目をcalcClassesに追加する
-  for (let key in compulsoryClasses) {
+  for (const key in compulsoryClasses) {
     calcClasses[key] = compulsoryClasses[key];
   }
 
@@ -244,7 +244,7 @@ function calculateGPA() {
   // electiveClassesのうち4科目を超えた分の科目数を加算する
   totalGrade += countExtraElectiveClasses();
   // GPAを計算する
-  let gpa = totalCredits > 0 ? totalGrade / totalCredits : 0.0;
+  const gpa = totalCredits > 0 ? totalGrade / totalCredits : 0.0;
   console.log(totalGrade, "/", totalCredits, "=", gpa); // デバッグ用
   return gpa.toFixed(3); // 小数点以下2桁に丸めて
 }
@@ -282,13 +282,13 @@ function createTable(calcClasses) {
 
 // グローバル変数を初期化する
 function initializeGlobals() {
-  for (let key in compulsoryClasses) {
+  for (const key in compulsoryClasses) {
     compulsoryClasses[key] = 0.0;
   }
-  for (let key in electiveClasses) {
+  for (const key in electiveClasses) {
     electiveClasses[key] = 0.0;
   }
-  for (let key in electiveCompulsoryClasses) {
+  for (const key in electiveCompulsoryClasses) {
     electiveCompulsoryClasses[key] = 0.0;
   }
   calcClasses = {};

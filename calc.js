@@ -151,17 +151,17 @@ function parseCSVData(csvData) {
     // 計算に必要な科目
     if (courseTitle in compulsoryClasses) {
       // 今保存されているものより高い評定なら更新する
-      if (compulsoryClasses[courseTitle] < grade) {
+      if (compulsoryClasses[courseTitle] <= grade) {
         compulsoryClasses[courseTitle] = grade;
       } 
     } else if (courseTitle in electiveClasses) {
       // 今保存されているものより高い評定なら更新する
-      if (electiveClasses[courseTitle] < grade) {
+      if (electiveClasses[courseTitle] <= grade) {
         electiveClasses[courseTitle] = grade;
       } 
     } else if (courseTitle in electiveCompulsoryClasses) {
       // 今保存されているものより高い評定なら更新する
-      if (electiveCompulsoryClasses[courseTitle] < grade) {
+      if (electiveCompulsoryClasses[courseTitle] <= grade) {
         electiveCompulsoryClasses[courseTitle] = grade;
       }
     } else {

@@ -399,7 +399,7 @@ function createTable() {
   if (totalCompletedCredits > 0) {
     CompletedGPA = (compulsoryTotalGradePoints + electiveTotalGradePoints + electiveCompulsoryTotalGradePoints) / totalCompletedCredits;
   }
-  document.getElementById('completedGPA').innerHTML = `履修済み科目GPA: ${CompletedGPA.toFixed(3)}`;
+  document.getElementById('completedGPA').innerHTML = `履修済み科目GPA: ${CompletedGPA.toFixed(3)} （参考値）`;
 
   // 各科目の表を作成
   createSubjectTables();

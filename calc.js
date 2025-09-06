@@ -143,12 +143,10 @@ function parseCSVData(csvData) {
     let line = lines[i].trim();
     if (line === '') continue; // 空行をスキップ
     line = line.replaceAll("\"", ''); // 「"」を削除
-    // console.log(line); // デバッグ用
     // CSVの各行をカンマで分割して必要なフィールドを抽出
     let splitLine = line.split(',');
     let courseTitle = splitLine[4];
     let grade = convertGradeToNumber(splitLine[splitLine.length -3]); // カンマが最後に含まれているから，最後から2番目の要素でも3を指定しないといけない
-    // console.log(mainClassification, tertiaryClassification, courseTitle, grade); // デバッグ用
 
     // 計算に必要な科目
     if (courseTitle in compulsoryClasses) {
@@ -244,7 +242,6 @@ function calculateGPA() {
 // Shift-JISをUTF-8に変換する関数
 function convertShiftJISToUTF8(shiftJISArrayBuffer) {
   const uint8Array = new Uint8Array(shiftJISArrayBuffer);
-  // console.log(uint8Array);
   const utf8Array = Encoding.convert(uint8Array, { to: 'UNICODE', from: 'SJIS' });
   const utf8String = Encoding.codeToString(utf8Array);
   return utf8String;
@@ -301,7 +298,7 @@ function calculateElectiveInfo() {
   }
 
   // 選択科目の履修率を計算
-  const completionRate = completedCredits > 0 ? (completedCredits / completedCredits) * 100 : 0;
+  const completionRate = completedClasses > 0 ? (completedClasses / totalClasses) * 100 : 0;
 
   // 選択科目のGPA小計を計算
   const gpaSubtotal = completedCredits > 0 ? totalGradePoints / completedCredits : 0;
@@ -399,7 +396,6 @@ function createTable() {
   // 履修済み科目GPAを計算して表示
   const CompletedGPA = (compulsoryTotalGradePoints + electiveTotalGradePoints + electiveCompulsoryTotalGradePoints) / (compulsoryCompletedCredits + electiveCompletedCredits + electiveCompulsoryCompletedCredits);
   document.getElementById('completedGPA').innerHTML = `履修済み科目GPA: ${CompletedGPA.toFixed(3)}`;
-  console.log("(", compulsoryTotalGradePoints, "+", electiveTotalGradePoints, "+", electiveCompulsoryTotalGradePoints, ") / (", compulsoryCompletedCredits, "+", electiveCompletedCredits, "+", electiveCompulsoryCompletedCredits, ") =", CompletedGPA); // デバッグ用
 
   // 各科目の表を作成
   createSubjectTables();
@@ -434,11 +430,9 @@ document.getElementById('calcButton').addEventListener('click', () => {
   reader.onload = function(e) {
     let csvData = e.target.result;
     csvData = convertShiftJISToUTF8(csvData); // Shift-JISをUTF-8に変換
-    // console.log(csvData); // CSVデータをコンソールに出力（デバッグ用）
     parseCSVData(csvData);
     const gpa = calculateGPA();
     document.getElementById('result').innerText = `配属GPA: ${gpa}`;
-    // console.log(calcClasses); // デバッグ用
     createTable(); // テーブルを作成
   };
   reader.readAsArrayBuffer(file);

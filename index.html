@@ -26,6 +26,37 @@
     <input type="file" id="fileInput" accept=".csv"><br>
     <button id="calcButton">計算</button>
     <div id="result"><!-- 動的に計算値が追加されます --></div>
+    <!-- 各ジャンルごとの履修率と小計的GPAの表 -->
+    <div id="summary">
+      <table id="summaryTable" border="1">
+        <thead>
+          <tr>
+            <th>区分</th>
+            <th>履修率</th>
+            <th>履修済科目GPA</th>
+          </tr>
+        </thead>
+        <tbody id="summaryBody">
+          <tr>
+            <td class="compulsory">必修科目</td>
+            <td id="compulsoryInfo"></td>
+            <td id="compulsoryGPA"></td>
+          </tr>
+          <tr>
+            <td class="elective">選択科目</td>
+            <td id="electiveInfo"></td>
+            <td id="electiveGPA"></td>
+          </tr>
+          <tr>
+            <td class="elective-compulsory">選択必修科目</td>
+            <td id="electiveCompulsoryInfo"></td>
+            <td id="electiveCompulsoryGPA"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="completedGPA"></div>
+    <small>選択科目を4科目を超えている場合、その科目数だけ配属GPA計算の分子(GPT)に加算されます。</small>
     <table id="gradeTable" border="1">
       <thead>
         <tr>
@@ -44,7 +75,7 @@
   </div> <!-- containerおわり -->
 </body>
 <!-- JavaScriptファイルの読み込み -->
-<script src="calc.js?v=2509070420"></script>
+<script src="calc.js?v=20250907T0420"></script>
 <!-- <script src="table.js"></script> -->
 <script src="https://unpkg.com/encoding-japanese@2.2.0/encoding.min.js"></script>
 </html>

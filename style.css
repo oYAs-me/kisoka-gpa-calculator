@@ -167,6 +167,24 @@ body {
   display: none;
 }
 
+/* completedGPAの書式設定 */
+#completedGPA {
+  background: rgba(155, 89, 182, 0.1);
+  border-left: 4px solid #9b59b6;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 25px;
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #8e44ad;
+  display: block;
+}
+
+/* completedGPAが空の場合は非表示にする */
+#completedGPA:empty {
+  display: none;
+}
+
 /* テーブルスタイル */
 #gradeTable {
   width: 100%;
@@ -199,10 +217,61 @@ body {
   transition: background-color 0.2s ease;
 }
 
+/* summaryTableの書式設定 */
+#summaryTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+#summaryTable thead {
+  background: linear-gradient(45deg, #16a085, #2ecc71);
+  color: white;
+}
+
+#summaryTable th {
+  padding: 15px 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1em;
+}
+
+#summaryTable td {
+  padding: 12px;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid #ecf0f1;
+  transition: background-color 0.2s ease;
+}
+
+#summaryTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+#summaryTable tbody tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
 /* GPが空白のセルの行の文字はグレーにする */
 #gradeTable td.empty-gp {
   color: #bdc3c7;
   font-style: italic;
+}
+
+/*"compulsory", "elective", "elective-compulsory" のクラス名を持つセルのスタイル */
+td.compulsory {
+  background: linear-gradient(to right, #e74c3c 0px, #e74c3c 5px, transparent 5px, transparent 100%);
+}
+td.elective {
+  background: linear-gradient(to right, #f1c40f 0px, #f1c40f 5px, transparent 5px, transparent 100%);
+}
+td.elective-compulsory {
+  background: linear-gradient(to right, #2ecc71 0px, #2ecc71 5px, transparent 5px, transparent 100%);
 }
 
 #gradeTable tbody tr:hover {

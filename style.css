@@ -199,6 +199,12 @@ body {
   transition: background-color 0.2s ease;
 }
 
+/* GPが空白のセルの行の文字はグレーにする */
+#gradeTable td.empty-gp {
+  color: #bdc3c7;
+  font-style: italic;
+}
+
 #gradeTable tbody tr:hover {
   background-color: #f8f9fa;
 }

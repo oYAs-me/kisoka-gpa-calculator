@@ -1,5 +1,3 @@
-// import createTable from "./table.js";
-
 // 評定を数値に変換する関数
 function convertGradeToNumber(grade) {
   const gradeMap = {
@@ -185,37 +183,36 @@ function countExtraElectiveClasses() {
   return Math.max(0, count - 4); // 4科目を超えた分の科目数を返す
 }
 
-// electiveClassesから科目数を勘定して上位4科目をClassGradeに追加する関数
-function addTopElectiveClasses() {
-  // console.log(electiveClasses); // デバッグ用
+// electiveClassesから科目数を勘定して上位4科目を取得する関数
+function TopElectiveClasses() {
   // electiveClassesを評定の高い順にソートして上位4科目を選ぶ
   let sortedElectiveClasses = Object.entries(electiveClasses)
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 4); // 上位4科目を取得
-
-  // 選ばれた科目をcalcClassesに追加する
-  // 4科目に満たない場合は0埋めされるので、そのまま追加しても問題ない
-  for (const [courseTitle, grade] of sortedElectiveClasses) {
-    calcClasses[courseTitle] = grade;
-    // console.log(`Added elective class: ${courseTitle} with grade ${grade}`); // デバッグ用
-  }
+  return sortedElectiveClasses;
 }
 
-// electiveCompulsoryClassesから上位1科目をcalcClassesに追加する関数
-function addTopElectiveCompulsoryClass() {
-  // console.log(electiveCompulsoryClasses); // デバッグ用
+// electiveCompulsoryClassesから上位1科目を取得する関数
+function TopElectiveCompulsoryClass() {
   // electiveCompulsoryClassesを評定の高い順にソートして上位1科目を選ぶ
   let sortedElectiveCompulsoryClasses = Object.entries(electiveCompulsoryClasses)
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 1); // 上位1科目を取得
-
-  // 選ばれた科目をcalcClassesに追加する
-  for (const [courseTitle, grade] of sortedElectiveCompulsoryClasses) {
-    calcClasses[courseTitle] = grade;
-    // console.log(`Added elective compulsory class: ${courseTitle} with grade ${grade}`); // デバッグ用
-  }
+  return sortedElectiveCompulsoryClasses;
 }
 
+// electiveClassesの上位4科目とelectiveCompulsoryClassesの上位1科目をcalcClassesに追加する関数
+function addTopElectiveAndCompulsoryClasses() {
+  const topElectiveClasses = TopElectiveClasses();
+  const topElectiveCompulsoryClass = TopElectiveCompulsoryClass();
+  // 選ばれた科目をcalcClassesに追加する
+  for (const [courseTitle, grade] of topElectiveClasses) {
+    calcClasses[courseTitle] = grade;
+  }
+  for (const [courseTitle, grade] of topElectiveCompulsoryClass) {
+    calcClasses[courseTitle] = grade;
+  }
+}
 
 // 配属GPAを計算する関数
   // GPA = (必修科目の評定と単位数の積の総和 + 選択科目上位4科目の評定と単位数の積の総和(4科目に満たないときは0埋めする) + 選択必修科目上位1科目の評定と単位数の積 + 選択科目のうち4科目を超えた分の科目数) / (必修科目・選択科目・選択必修科目の単位数の総和)
@@ -225,11 +222,8 @@ function calculateGPA() {
     calcClasses[key] = compulsoryClasses[key];
   }
 
-  // electiveClassesから上位4科目をcalcClassesに追加する
-  addTopElectiveClasses();
-
-  // electiveCompulsoryClassesから上位1科目をcalcClassesに追加する
-  addTopElectiveCompulsoryClass();
+  // electiveClassesのうち評定が高い上位4科目とelectiveCompulsoryClassesのうち評定が高い上位1科目をcalcClassesに追加する
+  addTopElectiveAndCompulsoryClasses();
 
   // calcClassesから各科目の評定の総和を計算する
   let totalGrade = 0.0;
@@ -256,16 +250,117 @@ function convertShiftJISToUTF8(shiftJISArrayBuffer) {
   return utf8String;
 }
 
-// 履修科目の表を作成する関数
-function createTable(compulsoryClasses, electiveClasses, electiveCompulsoryClasses) {
-  const table = document.getElementById("tableBody");
+// 必修科目の履修率とGPA小計を計算する関数
+function calculateCompulsoryInfo() {
+  // 必修科目の履修状況を集計
+  let totalClasses = 0;
+  let completedClasses = 0;
+  let completedCredits = 0;
+  let totalGradePoints = 0.0;
+  for (const [courseTitle, grade] of Object.entries(compulsoryClasses)) {
+    totalClasses++;
+    let credits = creditMap[courseTitle] || 0;
+    if (grade !== null) {
+      completedClasses++;
+      completedCredits += credits;
+      totalGradePoints += grade * credits;
+    }
+  }
+
+  // 必修科目の履修率を計算
+  const completionRate = completedClasses > 0 ? (completedClasses / totalClasses) * 100 : 0;
+
+  // 必修科目のGPA小計を計算
+  const gpaSubtotal = completedCredits > 0 ? totalGradePoints / completedCredits : 0;
+
+  // 表に結果を反映
+  const compulsoryInfo = document.getElementById("compulsoryInfo");
+  const compulsoryGPA = document.getElementById("compulsoryGPA");
+  compulsoryInfo.textContent = `${completionRate.toFixed(1)}%  (${completedClasses} / ${totalClasses})`;
+  compulsoryGPA.textContent = gpaSubtotal.toFixed(3);
+
+  // 履修済み科目GPA計算用データを出力
+  return [completedCredits, totalGradePoints];
+}
+
+// 選択科目の履修率とGPA小計を計算して表示する関数
+function calculateElectiveInfo() {
+  // 選択科目の履修状況を集計
+  const topElectiveClasses = TopElectiveClasses(); // 評定の高い上位4科目を取得
+  const totalClasses = topElectiveClasses.length; // 実際に取得した科目数を使用
+  let completedClasses = 0;
+  let completedCredits = 0;
+  let totalGradePoints = 0.0;
+  for (const [courseTitle, grade] of topElectiveClasses) {
+    let credits = creditMap[courseTitle] || 0;
+    if (grade !== null) {
+      completedClasses++;
+      completedCredits += credits;
+      totalGradePoints += grade * credits;
+    }
+  }
+
+  // 選択科目の履修率を計算
+  const completionRate = completedCredits > 0 ? (completedCredits / completedCredits) * 100 : 0;
+
+  // 選択科目のGPA小計を計算
+  const gpaSubtotal = completedCredits > 0 ? totalGradePoints / completedCredits : 0;
+
+  // 表に結果を反映
+  const electiveInfo = document.getElementById("electiveInfo");
+  const electiveGPA = document.getElementById("electiveGPA");
+  electiveInfo.textContent = `${completionRate.toFixed(1)}%  (${completedClasses} / ${totalClasses})`;
+  electiveGPA.textContent = gpaSubtotal.toFixed(3);
+
+  // 履修済み科目GPA計算用データを出力
+  return [completedCredits, totalGradePoints];
+}
+
+// 選択必修科目の履修率とGPA小計を計算して表示する関数
+function calculateElectiveCompulsoryInfo() {
+  // 選択必修科目の履修状況を集計
+  const topElectiveCompulsoryClass = TopElectiveCompulsoryClass(); // 評定の高い上位1科目を取得
+  const totalClasses = topElectiveCompulsoryClass.length;
+  let completedClasses = 0;
+  let completedCredits = 0;
+  let totalGradePoints = 0.0;
+  for (const [courseTitle, grade] of topElectiveCompulsoryClass) {
+    let credits = creditMap[courseTitle] || 0;
+    if (grade !== null) {
+      completedClasses++;
+      completedCredits += credits;
+      totalGradePoints += grade * credits;
+    }
+  }
+
+  // 選択必修科目の履修率を計算
+  const completionRate = completedClasses > 0 ? (completedClasses / totalClasses) * 100 : 0;
+
+  // 選択必修科目のGPA小計を計算
+  const gpaSubtotal = completedCredits > 0 ? totalGradePoints / completedCredits : 0;
+
+  // 表に結果を反映
+  const electiveCompulsoryInfo = document.getElementById("electiveCompulsoryInfo");
+  const electiveCompulsoryGPA = document.getElementById("electiveCompulsoryGPA");
+  electiveCompulsoryInfo.textContent = `${completionRate.toFixed(1)}%  (${completedClasses} / ${totalClasses})`;
+  electiveCompulsoryGPA.textContent = gpaSubtotal.toFixed(3);
+
+  // 履修済み科目GPA計算用データを出力
+  return [completedCredits, totalGradePoints];
+}
+
+// 各科目の表を作成する関数
+function createSubjectTables() {
+    const table = document.getElementById("tableBody");
   table.innerHTML = ""; // 既存の内容をクリア
 
   // 表に追加するObjectの配列
   const displayArray = [compulsoryClasses, electiveClasses, electiveCompulsoryClasses];
+  // 表の左に付ける色のためのクラス名の配列
+  const classNames = ["compulsory", "elective", "elective-compulsory"];
 
-  // 各科目を表に追加する
-  for (const classObject of displayArray) {
+  for (let i = 0; i < displayArray.length; i++) {
+    const classObject = displayArray[i];
     for (const [courseTitle, grade] of Object.entries(classObject)) {
       const row = document.createElement("tr");
       const titleCell = document.createElement("td");
@@ -282,6 +377,9 @@ function createTable(compulsoryClasses, electiveClasses, electiveCompulsoryClass
         creditCell.classList.add("empty-gp");
         gradeCell.classList.add("empty-gp");
       }
+
+      // titleCellにclassNames[i]を追加
+      titleCell.classList.add(classNames[i]);
   
       row.appendChild(titleCell);
       row.appendChild(creditCell);
@@ -289,6 +387,22 @@ function createTable(compulsoryClasses, electiveClasses, electiveCompulsoryClass
       table.appendChild(row);
     }
   }
+}
+
+// 履修科目の表を作成する関数
+function createTable() {
+  // 履修率とGPA小計を計算して表示
+  const [compulsoryCompletedCredits, compulsoryTotalGradePoints] = calculateCompulsoryInfo();
+  const [electiveCompletedCredits, electiveTotalGradePoints] = calculateElectiveInfo();
+  const [electiveCompulsoryCompletedCredits, electiveCompulsoryTotalGradePoints] = calculateElectiveCompulsoryInfo();
+
+  // 履修済み科目GPAを計算して表示
+  const CompletedGPA = (compulsoryTotalGradePoints + electiveTotalGradePoints + electiveCompulsoryTotalGradePoints) / (compulsoryCompletedCredits + electiveCompletedCredits + electiveCompulsoryCompletedCredits);
+  document.getElementById('completedGPA').innerHTML = `履修済み科目GPA: ${CompletedGPA.toFixed(3)}`;
+  console.log("(", compulsoryTotalGradePoints, "+", electiveTotalGradePoints, "+", electiveCompulsoryTotalGradePoints, ") / (", compulsoryCompletedCredits, "+", electiveCompletedCredits, "+", electiveCompulsoryCompletedCredits, ") =", CompletedGPA); // デバッグ用
+
+  // 各科目の表を作成
+  createSubjectTables();
 }
 
 // グローバル変数を初期化する
@@ -325,7 +439,7 @@ document.getElementById('calcButton').addEventListener('click', () => {
     const gpa = calculateGPA();
     document.getElementById('result').innerText = `配属GPA: ${gpa}`;
     // console.log(calcClasses); // デバッグ用
-    createTable(compulsoryClasses, electiveClasses, electiveCompulsoryClasses); // テーブルを作成
+    createTable(); // テーブルを作成
   };
   reader.readAsArrayBuffer(file);
 });

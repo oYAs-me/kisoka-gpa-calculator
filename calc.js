@@ -16,7 +16,7 @@ function convertGradeToNumber(grade) {
   return gradeMap[grade] || 0.0; // 評定がマップにない場合は0.0を返す
 }
 
-// 配属GPA計算に用いられる講義名とその評定を保管するMap
+// 配属GPA計算に用いられる講義名とその評定を保管するObject
 const compulsoryClasses = {
   "微分積分学基礎Ⅰ": null,
   "微分積分学基礎Ⅱ": null,
@@ -76,7 +76,7 @@ const electiveCompulsoryClasses = {
 // GPA計算に用いるすべての講義名とその評定を保管するMap
 const calcClasses = new Map();
 
-// 各科目の単位数を保管するMap
+// 各科目の単位数を保管するObject
 const creditMap = {
   "微分積分学基礎Ⅰ": 2,
   "微分積分学基礎Ⅱ": 2,
@@ -148,8 +148,6 @@ function parseCSVData(csvData) {
     // console.log(line); // デバッグ用
     // CSVの各行をカンマで分割して必要なフィールドを抽出
     let splitLine = line.split(',');
-    let mainClassification = splitLine[1];
-    let tertiaryClassification = splitLine[3];
     let courseTitle = splitLine[4];
     let grade = convertGradeToNumber(splitLine[splitLine.length -3]); // カンマが最後に含まれているから，最後から2番目の要素でも3を指定しないといけない
     // console.log(mainClassification, tertiaryClassification, courseTitle, grade); // デバッグ用
@@ -187,7 +185,7 @@ function countExtraElectiveClasses() {
   return Math.max(0, count - 4); // 4科目を超えた分の科目数を返す
 }
 
-// electiveClassesから科目数を勘定して上位4科目をcompulsoryClassesに追加する関数
+// electiveClassesから科目数を勘定して上位4科目をClassGradeに追加する関数
 function addTopElectiveClasses() {
   // console.log(electiveClasses); // デバッグ用
   // electiveClassesを評定の高い順にソートして上位4科目を選ぶ
@@ -195,7 +193,7 @@ function addTopElectiveClasses() {
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 4); // 上位4科目を取得
 
-  // 選ばれた科目をcompulsoryClassesに追加する
+  // 選ばれた科目をcalcClassesに追加する
   // 4科目に満たない場合は0埋めされるので、そのまま追加しても問題ない
   for (const [courseTitle, grade] of sortedElectiveClasses) {
     calcClasses[courseTitle] = grade;
@@ -203,7 +201,7 @@ function addTopElectiveClasses() {
   }
 }
 
-// electiveCompulsoryClassesから上位1科目をcompulsoryClassesに追加する関数
+// electiveCompulsoryClassesから上位1科目をcalcClassesに追加する関数
 function addTopElectiveCompulsoryClass() {
   // console.log(electiveCompulsoryClasses); // デバッグ用
   // electiveCompulsoryClassesを評定の高い順にソートして上位1科目を選ぶ
@@ -211,7 +209,7 @@ function addTopElectiveCompulsoryClass() {
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 1); // 上位1科目を取得
 
-  // 選ばれた科目をcompulsoryClassesに追加する
+  // 選ばれた科目をcalcClassesに追加する
   for (const [courseTitle, grade] of sortedElectiveCompulsoryClasses) {
     calcClasses[courseTitle] = grade;
     // console.log(`Added elective compulsory class: ${courseTitle} with grade ${grade}`); // デバッグ用

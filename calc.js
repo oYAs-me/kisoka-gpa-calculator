@@ -394,7 +394,11 @@ function createTable() {
   const [electiveCompulsoryCompletedCredits, electiveCompulsoryTotalGradePoints] = calculateElectiveCompulsoryInfo();
 
   // 履修済み科目GPAを計算して表示
-  const CompletedGPA = (compulsoryTotalGradePoints + electiveTotalGradePoints + electiveCompulsoryTotalGradePoints) / (compulsoryCompletedCredits + electiveCompletedCredits + electiveCompulsoryCompletedCredits);
+  const totalCompletedCredits = compulsoryCompletedCredits + electiveCompletedCredits + electiveCompulsoryCompletedCredits;
+  let CompletedGPA = 0.0;
+  if (totalCompletedCredits > 0) {
+    CompletedGPA = (compulsoryTotalGradePoints + electiveTotalGradePoints + electiveCompulsoryTotalGradePoints) / totalCompletedCredits;
+  }
   document.getElementById('completedGPA').innerHTML = `履修済み科目GPA: ${CompletedGPA.toFixed(3)}`;
 
   // 各科目の表を作成

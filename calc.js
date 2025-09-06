@@ -257,39 +257,52 @@ function convertShiftJISToUTF8(shiftJISArrayBuffer) {
 }
 
 // 履修科目の表を作成する関数
-function createTable(calcClasses) {
+function createTable(compulsoryClasses, electiveClasses, electiveCompulsoryClasses) {
   const table = document.getElementById("tableBody");
   table.innerHTML = ""; // 既存の内容をクリア
 
-  for (const [courseTitle, grade] of Object.entries(calcClasses)) {
-    const row = document.createElement("tr");
-    const titleCell = document.createElement("td");
-    const creditCell = document.createElement("td");
-    const gradeCell = document.createElement("td");
+  // 表に追加するObjectの配列
+  const displayArray = [compulsoryClasses, electiveClasses, electiveCompulsoryClasses];
 
-    titleCell.textContent = courseTitle;
-    creditCell.textContent = creditMap[courseTitle] || "N/A";
-    gradeCell.textContent = grade.toString();
+  // 各科目を表に追加する
+  for (const classObject of displayArray) {
+    for (const [courseTitle, grade] of Object.entries(classObject)) {
+      const row = document.createElement("tr");
+      const titleCell = document.createElement("td");
+      const creditCell = document.createElement("td");
+      const gradeCell = document.createElement("td");
+
+      titleCell.textContent = courseTitle;
+      creditCell.textContent = creditMap[courseTitle] || "N/A";
+      gradeCell.textContent = grade === null ? "-" : grade.toString();
+
+      // 評定がnullの場合は3つのtd要素に.empty-gpクラスを追加
+      if (grade === null) {
+        titleCell.classList.add("empty-gp");
+        creditCell.classList.add("empty-gp");
+        gradeCell.classList.add("empty-gp");
+      }
   
-    row.appendChild(titleCell);
-    row.appendChild(creditCell);
-    row.appendChild(gradeCell);
-    table.appendChild(row);
+      row.appendChild(titleCell);
+      row.appendChild(creditCell);
+      row.appendChild(gradeCell);
+      table.appendChild(row);
+    }
   }
 }
 
 // グローバル変数を初期化する
 function initializeGlobals() {
   for (const key in compulsoryClasses) {
-    compulsoryClasses[key] = 0.0;
+    compulsoryClasses[key] = null;
   }
   for (const key in electiveClasses) {
-    electiveClasses[key] = 0.0;
+    electiveClasses[key] = null;
   }
   for (const key in electiveCompulsoryClasses) {
-    electiveCompulsoryClasses[key] = 0.0;
+    electiveCompulsoryClasses[key] = null;
   }
-  calcClasses.clear;
+  calcClasses.clear();
 }
 
 // Calculate GPAボタンがクリックされたときの処理
@@ -312,7 +325,7 @@ document.getElementById('calcButton').addEventListener('click', () => {
     const gpa = calculateGPA();
     document.getElementById('result').innerText = `配属GPA: ${gpa}`;
     // console.log(calcClasses); // デバッグ用
-    createTable(calcClasses); // テーブルを作成
+    createTable(compulsoryClasses, electiveClasses, electiveCompulsoryClasses); // テーブルを作成
   };
   reader.readAsArrayBuffer(file);
 });

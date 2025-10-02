@@ -146,22 +146,22 @@ function parseCSVData(csvData) {
     // CSVの各行をカンマで分割して必要なフィールドを抽出
     let splitLine = line.split(',');
     let courseTitle = splitLine[4];
-    let grade = convertGradeToNumber(splitLine[splitLine.length -3]); // カンマが最後に含まれているから，最後から2番目の要素でも3を指定しないといけない
+    let grade = splitLine[splitLine.length -3]; // カンマが最後に含まれているから，最後から2番目の要素でも3を指定しないといけない
 
     // 計算に必要な科目
     if (courseTitle in compulsoryClasses) {
       // 今保存されているものより高い評定なら更新する
-      if (compulsoryClasses[courseTitle] <= grade) {
+      if (convertGradeToNumber(compulsoryClasses[courseTitle]) <= convertGradeToNumber(grade)) {
         compulsoryClasses[courseTitle] = grade;
       } 
     } else if (courseTitle in electiveClasses) {
       // 今保存されているものより高い評定なら更新する
-      if (electiveClasses[courseTitle] <= grade) {
+      if (convertGradeToNumber(electiveClasses[courseTitle]) <= convertGradeToNumber(grade)) {
         electiveClasses[courseTitle] = grade;
       } 
     } else if (courseTitle in electiveCompulsoryClasses) {
       // 今保存されているものより高い評定なら更新する
-      if (electiveCompulsoryClasses[courseTitle] <= grade) {
+      if (convertGradeToNumber(electiveCompulsoryClasses[courseTitle]) <= convertGradeToNumber(grade)) {
         electiveCompulsoryClasses[courseTitle] = grade;
       }
     } else {
@@ -174,7 +174,7 @@ function parseCSVData(csvData) {
 function countExtraElectiveClasses() {
   let count = 0;
   for (let grade of Object.values(electiveClasses)) {
-    if (grade > 0) {
+    if (convertGradeToNumber(grade) > 0) {
       count++;
     }
   }
@@ -184,19 +184,37 @@ function countExtraElectiveClasses() {
 // electiveClassesから科目数を勘定して上位4科目を取得する関数
 function TopElectiveClasses() {
   // electiveClassesを評定の高い順にソートして上位4科目を選ぶ
-  let sortedElectiveClasses = Object.entries(electiveClasses)
+  const copyOfElectiveClasses = {...electiveClasses}; // 元のオブジェクトを変更しないようにコピーを作成
+  for (const key in copyOfElectiveClasses) {
+    copyOfElectiveClasses[key] = convertGradeToNumber(copyOfElectiveClasses[key]);
+  }
+  let sortedElectiveClasses = Object.entries(copyOfElectiveClasses)
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 4); // 上位4科目を取得
-  return sortedElectiveClasses;
+  // 元のelectiveClassesから科目名と評定を取得して返す
+  const top4OfElectiveClasses = [];
+  for (const [courseTitle, _] of sortedElectiveClasses) {
+    top4OfElectiveClasses.push([courseTitle, electiveClasses[courseTitle]]);
+  }
+  return top4OfElectiveClasses;
 }
 
 // electiveCompulsoryClassesから上位1科目を取得する関数
 function TopElectiveCompulsoryClass() {
   // electiveCompulsoryClassesを評定の高い順にソートして上位1科目を選ぶ
-  let sortedElectiveCompulsoryClasses = Object.entries(electiveCompulsoryClasses)
+  const copyOfElectiveCompulsoryClasses = {...electiveCompulsoryClasses}; // 元のオブジェクトを変更しないようにコピーを作成
+  for (const key in copyOfElectiveCompulsoryClasses) {
+    copyOfElectiveCompulsoryClasses[key] = convertGradeToNumber(copyOfElectiveCompulsoryClasses[key]);
+  }
+  let sortedElectiveCompulsoryClasses = Object.entries(copyOfElectiveCompulsoryClasses)
     .sort((a, b) => b[1] - a[1]) // 評定の高い順にソート
     .slice(0, 1); // 上位1科目を取得
-  return sortedElectiveCompulsoryClasses;
+  // 元のelectiveCompulsoryClassesから科目名と評定を取得して返す
+  const top1OfElectiveCompulsoryClasses = [];
+  for (const [courseTitle, _] of sortedElectiveCompulsoryClasses) {
+    top1OfElectiveCompulsoryClasses.push([courseTitle, electiveCompulsoryClasses[courseTitle]]);
+  }
+  return top1OfElectiveCompulsoryClasses;
 }
 
 // electiveClassesの上位4科目とelectiveCompulsoryClassesの上位1科目をcalcClassesに追加する関数
@@ -228,7 +246,7 @@ function calculateGPA() {
   let totalCredits = 0;
   for (let [courseTitle, grade] of Object.entries(calcClasses)) {
     let credits = creditMap[courseTitle] || 0; // creditMapに科目がない場合は0単位とする（ありえないはずだが）
-    totalGrade += grade * credits;
+    totalGrade += convertGradeToNumber(grade) * credits;
     totalCredits += credits;
   }
   // electiveClassesのうち4科目を超えた分の科目数を加算する
@@ -260,7 +278,7 @@ function calculateCompulsoryInfo() {
     if (grade !== null) {
       completedClasses++;
       completedCredits += credits;
-      totalGradePoints += grade * credits;
+      totalGradePoints += convertGradeToNumber(grade) * credits;
     }
   }
 
@@ -293,7 +311,7 @@ function calculateElectiveInfo() {
     if (grade !== null) {
       completedClasses++;
       completedCredits += credits;
-      totalGradePoints += grade * credits;
+      totalGradePoints += convertGradeToNumber(grade) * credits;
     }
   }
 
@@ -326,7 +344,7 @@ function calculateElectiveCompulsoryInfo() {
     if (grade !== null) {
       completedClasses++;
       completedCredits += credits;
-      totalGradePoints += grade * credits;
+      totalGradePoints += convertGradeToNumber(grade) * credits;
     }
   }
 

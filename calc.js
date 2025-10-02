@@ -10,8 +10,13 @@ function convertGradeToNumber(grade) {
     'C': 1.0,
     'D': 0.0,
     'F': 0.0,
+    null: 0.0 // nullは未履修を意味し、GPA計算では0として扱う
   };
-  return gradeMap[grade] || 0.0; // 評定がマップにない場合は0.0を返す
+  let gradeNum = gradeMap[grade]
+  if (gradeNum === undefined) {
+    gradeNum = -1; // 存在しない評定は-1として扱って，hogehogeClassesの更新をさせない
+  }
+  return gradeNum;
 }
 
 // 配属GPA計算に用いられる講義名とその評定を保管するObject
@@ -421,6 +426,14 @@ function createTable() {
 
   // 各科目の表を作成
   createSubjectTables();
+
+  // 各科目のGPAを表示
+  console.log(
+    " 必修科目GPT", compulsoryTotalGradePoints, "\n",
+    "選択科目GPT", electiveTotalGradePoints, "\n",
+    "選択必修科目GP", electiveCompulsoryTotalGradePoints, "\n",
+    "選択科目のうち4科目を超えた分の科目数", countExtraElectiveClasses(),
+  );
 }
 
 // グローバル変数を初期化する

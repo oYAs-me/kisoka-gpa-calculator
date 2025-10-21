@@ -307,14 +307,14 @@ function calculateCompulsoryInfo() {
 function calculateElectiveInfo() {
   // 選択科目の履修状況を集計
   const topElectiveClasses = TopElectiveClasses(); // 評定の高い上位4科目を取得
-  const totalClasses = topElectiveClasses.length; // 実際に取得した科目数を使用
-  let completedClasses = 0;
+  const totalClasses = topElectiveClasses.length; // 実際に取得した科目数を使用（GPA計算に直接算入している科目だけのカウント）
+  // electiveClassesのうちnull以外の科目数を履修済み科目数としてカウント
+  const completedClasses = Object.keys(electiveClasses).filter(key => electiveClasses[key] !== null).length;
   let completedCredits = 0;
   let totalGradePoints = 0.0;
   for (const [courseTitle, grade] of topElectiveClasses) {
     let credits = creditMap[courseTitle] || 0;
     if (grade !== null) {
-      completedClasses++;
       completedCredits += credits;
       totalGradePoints += convertGradeToNumber(grade) * credits;
     }

@@ -383,8 +383,8 @@ function createSubjectTables() {
       titleCell.textContent = courseTitle;
       gradeCell.textContent = grade === null ? "-" : grade.toString();
 
-      // 評定がnullの場合は3つのtd要素に.empty-gpクラスを追加
-      if (grade === null) {
+      // 評定がnull/F/Dの場合は3つのtd要素に.empty-gpクラスを追加
+      if (convertGradeToNumber(grade) <= 0) {
         titleCell.classList.add("empty-gp");
         gradeCell.classList.add("empty-gp");
       }

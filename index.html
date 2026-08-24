@@ -26,6 +26,7 @@
     <input type="file" id="fileInput" accept=".csv"><br>
     <button id="calcButton">計算</button>
     <div id="result"><!-- 動的に計算値が追加されます --></div>
+    <div id="extraElectivePoints"></div>
     <!-- 各ジャンルごとの履修率と小計的GPAの表 -->
     <div id="summary">
       <table id="summaryTable" border="1">
@@ -33,28 +34,33 @@
           <tr>
             <th>区分</th>
             <th>履修率</th>
-            <th>履修済科目GPA</th>
+            <th>得単率</th>
+            <th>配属GPA相当値</th>
           </tr>
         </thead>
         <tbody id="summaryBody">
           <tr>
             <td class="compulsory">必修科目</td>
             <td id="compulsoryInfo"></td>
+            <td id="compulsoryEarnedInfo"></td>
             <td id="compulsoryGPA"></td>
           </tr>
           <tr>
             <td class="elective">選択科目</td>
             <td id="electiveInfo"></td>
+            <td id="electiveEarnedInfo"></td>
             <td id="electiveGPA"></td>
           </tr>
           <tr>
             <td class="elective-compulsory">選択必修科目</td>
             <td id="electiveCompulsoryInfo"></td>
+            <td id="electiveCompulsoryEarnedInfo"></td>
             <td id="electiveCompulsoryGPA"></td>
           </tr>
         </tbody>
       </table>
     </div>
+    <div id="eligibility" aria-live="polite"></div>
     <div id="completedGPA"></div>
     <small>選択科目を4科目を超えている場合、その科目数だけ配属GPA計算の分子(GPT)に加算されます。</small>
     <table id="gradeTable" border="1">
@@ -74,7 +80,7 @@
   </div> <!-- containerおわり -->
 </body>
 <!-- JavaScriptファイルの読み込み -->
-<script src="calc.js?v=20251120T1453"></script>
+<script src="calc.js?v=20260825T0419"></script>
 <!-- <script src="table.js"></script> -->
 <script src="https://unpkg.com/encoding-japanese@2.2.0/encoding.min.js"></script>
 </html>

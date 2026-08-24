@@ -167,6 +167,59 @@ body {
   display: none;
 }
 
+#extraElectivePoints {
+  background: rgba(241, 196, 15, 0.1);
+  border-left: 4px solid #f1c40f;
+  border-radius: 6px;
+  padding: 15px 20px;
+  margin-bottom: 25px;
+  color: #8a6d1d;
+}
+
+#extraElectivePoints:empty {
+  display: none;
+}
+
+/* 仮配属可否の表示 */
+#eligibility {
+  border-left: 4px solid;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 25px;
+  font-size: 1.05em;
+  white-space: pre-line;
+}
+
+#eligibility:empty {
+  display: none;
+}
+
+#eligibility strong,
+#eligibility span {
+  display: block;
+}
+
+#eligibility strong {
+  margin-bottom: 8px;
+  font-size: 1.2em;
+}
+
+#eligibility.eligible {
+  background: rgba(46, 204, 113, 0.1);
+  border-left-color: #2ecc71;
+  color: #27ae60;
+}
+
+#eligibility.not-eligible {
+  background: rgba(231, 76, 60, 0.1);
+  border-left-color: #e74c3c;
+  color: #c0392b;
+}
+
+#eligibility.not-eligible span.condition-met {
+  color: #27ae60;
+}
+
 /* completedGPAの書式設定 */
 #completedGPA {
   background: rgba(155, 89, 182, 0.1);
@@ -244,6 +297,7 @@ body {
 #summaryTable td {
   padding: 12px;
   text-align: center;
+  white-space: pre-line;
   border: none;
   border-bottom: 1px solid #ecf0f1;
   transition: background-color 0.2s ease;

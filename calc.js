@@ -287,7 +287,7 @@ function displayEligibility() {
 
   eligibility.className = isEligible ? "eligible" : "not-eligible";
   eligibility.innerHTML = `
-    <strong>仮配属可否: ${isEligible ? "仮配属可能" : "仮配属不可"}</strong>
+    <strong>仮配属可否: ${isEligible ? "仮配属可能（と思われる）" : "仮配属不可"}</strong>
     <span class="${experimentsRequirementMet ? "condition-met" : ""}">実験科目: ${experimentsCompleted} / ${requiredExperimentClasses.length} 科目修得</span>
     <span class="${lectureRequirementMet ? "condition-met" : ""}">必修講義科目の未修得: ${unearnedLectureClasses} 科目（5科目以下が条件）</span>
     <span>※他にも条件があります。詳細は「卒業研究配属先決定方法」（ガイダンス資料）を確認してください。</span>
